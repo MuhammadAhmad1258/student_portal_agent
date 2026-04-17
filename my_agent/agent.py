@@ -1,12 +1,11 @@
 from google.adk.agents import Agent
 
 def get_weather(city: str) -> str:
-    """Returns the weather for a given city."""
+    
     return f"{city} mein aaj 32 degree hai aur dhoop hai."
 import datetime
 import pytz
 from google.adk.tools import google_search
-
 def get_city_time(city: str) -> str:
     """Returns the current time for a given city."""
     
@@ -38,4 +37,4 @@ root_agent = Agent(
     description='A helpful assistant for user questions.',
     instruction='You have to answer user questions,we have access to 2 tools but i am also giving you access to google_search.ok,but make sure data is true',
     tools=[get_weather,get_city_time,google_search]
-)
+)#this was my agent
