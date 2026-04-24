@@ -53,7 +53,7 @@ from google.adk.agents import LlmAgent
 
 coordinator_agent = LlmAgent(
     name="coordinator",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Main coordinator for the Student Admission Portal.",
     instruction="""
     You are the main agent for a Pakistani university admission portal.
@@ -77,7 +77,7 @@ from tools.profile_tools import save_profile, get_profile, update_marks
 
 profile_agent = LlmAgent(
     name="profile_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Saves and retrieves student profile and marks.",
     instruction="""
     Help the student set up or update their profile.
@@ -101,7 +101,7 @@ from tools.merit_tools import (
 
 merit_agent = LlmAgent(
     name="merit_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Calculates admission aggregate for Pakistani universities.",
     instruction="""
     Calculate the student's aggregate for requested universities.
@@ -125,7 +125,7 @@ from tools.eligibility_tools import get_eligible_universities, get_realistic_cha
 
 eligibility_agent = LlmAgent(
     name="eligibility_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Tells student which universities they are eligible for.",
     instruction="""
     Based on student's aggregate scores, tell them which universities
@@ -147,7 +147,7 @@ from tools.deadline_tools import (
 
 deadline_agent = LlmAgent(
     name="deadline_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Provides deadlines and entry test dates for universities.",
     instruction="""
     Answer questions about application deadlines, entry test dates,
@@ -165,7 +165,7 @@ from tools.comparison_tools import compare_universities, get_fee_structure
 
 comparison_agent = LlmAgent(
     name="comparison_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Compares two universities side by side.",
     instruction="""
     Compare universities on: fee structure, location, programs,
@@ -183,7 +183,7 @@ from google.adk.tools import google_search
 
 search_agent = LlmAgent(
     name="search_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Searches the web for live admission news and updates.",
     instruction="""
     Search for current, time-sensitive admission information:

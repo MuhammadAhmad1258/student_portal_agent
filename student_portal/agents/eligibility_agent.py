@@ -4,7 +4,7 @@ from tools.eligibility_tools import get_eligible_universities, get_realistic_cha
 
 eligibility_agent = LlmAgent(
     name="eligibility_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Tells student which universities they are eligible for.",
     instruction="""
     Based on student's aggregate scores, tell them which universities

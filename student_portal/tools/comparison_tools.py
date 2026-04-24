@@ -14,9 +14,8 @@ def compare_universities(uni1: str, uni2: str) -> str:
     lines = [f"{'Feature':<20} {uni1:<20} {uni2:<20}"]
     lines.append("-" * 60)
     for f in fields:
-        lines.append(f"{f:<20} {str(u1.get(f,'N/A')):<20} {str(u2.get(f,'N/A')):<20}")
-    return "
-".join(lines)
+        lines.append(f"{f:<20} {str(u1.get(f, 'N/A')):<20} {str(u2.get(f, 'N/A')):<20}")
+    return "\n".join(lines)
 
 def get_fee_structure(university: str) -> str:
     """Get fee structure for a university."""
@@ -26,9 +25,7 @@ def get_fee_structure(university: str) -> str:
     fee = uni_data.get("semester_fee", "Not available")
     hostel = uni_data.get("hostel_fee", "Not available")
     return (
-        f"{university} Fee Structure:
-"
-        f"  Semester Fee : {fee}
-"
+        f"{university} Fee Structure:\n"
+        f"  Semester Fee : {fee}\n"
         f"  Hostel Fee   : {hostel}"
     )

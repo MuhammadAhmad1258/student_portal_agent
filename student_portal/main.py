@@ -1,4 +1,7 @@
 import asyncio
+from dotenv import load_dotenv
+load_dotenv()
+
 from runner.session import create_session_and_runner
 from runner.helper import call_agent_async
 

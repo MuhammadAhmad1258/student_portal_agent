@@ -35,6 +35,6 @@ root_agent = Agent(
     model='gemini-2.0-flash',
     name='root_agent',
     description='A helpful assistant for user questions.',
-    instruction='You have to answer user questions,we have access to 2 tools but i am also giving you access to google_search.ok,but make sure data is true',
-    tools=[get_weather,get_city_time,google_search]
+    instruction='You have to answer user questions,you have access to tools, use them when needed.',
+    tools=[get_weather,get_city_time]
 )#this was my agent

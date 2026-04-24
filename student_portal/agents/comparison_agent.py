@@ -4,7 +4,7 @@ from tools.comparison_tools import compare_universities, get_fee_structure
 
 comparison_agent = LlmAgent(
     name="comparison_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Compares two universities side by side.",
     instruction="""
     Compare universities on: fee structure, location, programs,

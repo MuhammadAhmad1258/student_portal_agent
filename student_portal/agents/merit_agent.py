@@ -10,7 +10,7 @@ from tools.merit_tools import (
 
 merit_agent = LlmAgent(
     name="merit_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Calculates admission aggregate for Pakistani universities.",
     instruction="""
     Calculate the student's aggregate for requested universities.

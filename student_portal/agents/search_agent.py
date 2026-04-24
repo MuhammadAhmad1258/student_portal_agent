@@ -4,7 +4,7 @@ from google.adk.tools import google_search
 
 search_agent = LlmAgent(
     name="search_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Searches the web for live admission news and updates.",
     instruction="""
     Search for current, time-sensitive admission information:

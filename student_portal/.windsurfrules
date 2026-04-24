@@ -1,0 +1,231 @@
+# Student Admission Portal — AI Agent Project
+# Windsurf Context File | Read this before every suggestion
+
+## Project Overview
+We are building a Pakistani university admission portal powered by Google ADK (Agent Development Kit).
+Each student gets their own personal portal (unique USER_ID + SESSION_ID) to track admissions across top Pakistani universities.
+The agent answers queries, calculates merit, checks deadlines, compares universities, and fetches live info via Google Search.
+
+## Tech Stack
+- Language: Python
+- Framework: Google ADK (google-adk)
+- Memory: ADK Persistent Memory
+- Search: Google Search Tool (built into ADK)
+- Architecture: Multi-agent (agent team)
+
+---
+
+## How Google ADK Works (Critical — Read This)
+ADK has a specific flow that MUST be followed in this exact sequence:
+
+1. Define tools (plain Python functions with docstrings)
+2. Define agents (LlmAgent, pass tools into it)
+3. Create session service → InMemorySessionService()
+4. Create session → await session_service.create_session(...) [MUST be awaited]
+5. Create runner → Runner(agent=..., app_name=..., session_service=...)
+6. call_agent_async() helper function to run queries
+
+### Key ADK Rules
+- `create_session()` MUST always be awaited — forgetting causes silent failure then ValueError
+- `runner.run_async()` returns a STREAM of events, not a single answer
+- Always loop: `async for event in events` and check `event.is_final_response()`
+- User query MUST be wrapped: `types.Content(role='user', parts=[types.Part(text=query)])`
+- Pass `session_service` into Runner — NOT the session object itself
+- In .py scripts use `asyncio.run(main())` — in Jupyter/Colab just `await` directly
+
+### Standard ADK Imports
+```python
+import asyncio
+from google.adk.agents import LlmAgent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+```
+
+### Standard Session + Runner Pattern
+```python
+APP_NAME   = "student_portal"
+USER_ID    = "user_1"
+SESSION_ID = "session_1"
+
+session_service = InMemorySessionService()
+session = await session_service.create_session(
+    app_name=APP_NAME,
+    user_id=USER_ID,
+    session_id=SESSION_ID
+)
+
+runner = Runner(
+    agent=coordinator_agent,
+    app_name=APP_NAME,
+    session_service=session_service
+)
+```
+
+### Standard Helper Function Pattern
+```python
+async def call_agent_async(query: str):
+    content = types.Content(role='user', parts=[types.Part(text=query)])
+    events = runner.run_async(user_id=USER_ID, session_id=SESSION_ID, new_message=content)
+    async for event in events:
+        if event.is_final_response():
+            response = event.content.parts[0].text
+            print(f"Agent: {response}")
+            return response
+```
+
+---
+
+## Project Folder Structure (Strict — Do Not Deviate)
+```
+student_portal/
+│
+├── main.py                  # Entry point only — max 15 lines
+│
+├── agents/
+│   ├── __init__.py
+│   ├── coordinator.py       # Root agent, routes to sub-agents
+│   ├── profile_agent.py     # Handles student profile & marks
+│   ├── merit_agent.py       # Calculates aggregate per uni formula
+│   ├── eligibility_agent.py # "Where can I get in?" logic
+│   ├── deadline_agent.py    # Application & test dates
+│   ├── comparison_agent.py  # Side-by-side uni comparison
+│   └── search_agent.py      # Live Google Search for dynamic info
+│
+├── tools/
+│   ├── __init__.py
+│   ├── profile_tools.py
+│   ├── merit_tools.py
+│   ├── eligibility_tools.py
+│   ├── deadline_tools.py
+│   └── comparison_tools.py
+│
+├── data/
+│   ├── universities.py      # Static uni info (fees, locations, programs)
+│   └── formulas.py          # Aggregate formulas per university
+│
+├── runner/
+│   ├── __init__.py
+│   ├── session.py           # Session setup logic
+│   └── helper.py            # call_agent_async lives here
+│
+└── memory/
+    ├── __init__.py
+    └── store.py             # Persistent memory configuration
+```
+
+### Modularity Rules (Non-Negotiable)
+- Tools live in tools/ — never inside agent files
+- Data lives in data/ — no hardcoded values inside tools or agents
+- Agents import from tools/, tools import from data/
+- coordinator.py imports all sub-agents
+- main.py only calls the runner — nothing else
+- One responsibility per file — no mixing concerns
+
+---
+
+## Universities in Scope (v1)
+Only these 5 universities are in scope for v1:
+
+| University | Entry Test | Test Total |
+|------------|------------|------------|
+| NUST       | NET        | 200        |
+| FAST       | NU Test / NAT | 100     |
+| UET Lahore | ECAT       | 400        |
+| COMSATS    | NTS-NAT    | 100        |
+| Air University | AU-CBT | 100        |
+
+IBA and Aga Khan University are excluded from v1 (their merit systems are non-formula based).
+
+---
+
+## Aggregate Formulas (Verified)
+
+### NUST
+Aggregate = (Matric% × 0.10) + (FSc% × 0.15) + (NET% × 0.75)
+- NET is out of 200 → convert to percentage before applying
+
+### FAST (Computing/Business)
+Aggregate = (Matric% × 0.10) + (FSc% × 0.40) + (Test% × 0.50)
+- Test can be NU Test or NAT
+
+### UET Lahore
+Aggregate = (Matric% × 0.25) + (FSc% × 0.45) + (ECAT% × 0.30)
+- ECAT is out of 400 → convert to percentage before applying
+
+### COMSATS
+Aggregate = (Matric% × 0.10) + (FSc% × 0.40) + (NTS% × 0.50)
+
+### Air University
+Aggregate = (Matric% × 0.15) + (FSc% × 0.35) + (AU-CBT% × 0.50)
+
+### Generic Formula Function Pattern
+```python
+def calculate_aggregate(matric_obtained, matric_total,
+                         fsc_obtained, fsc_total,
+                         test_obtained, test_total,
+                         matric_weight, fsc_weight, test_weight) -> float:
+    matric_pct = (matric_obtained / matric_total) * 100
+    fsc_pct    = (fsc_obtained / fsc_total) * 100
+    test_pct   = (test_obtained / test_total) * 100
+    return (matric_pct * matric_weight) + (fsc_pct * fsc_weight) + (test_pct * test_weight)
+```
+
+---
+
+## Agent Responsibilities
+
+### coordinator_agent
+- Root agent — receives all user queries
+- Routes to the correct sub-agent based on intent
+- Never handles logic itself — only delegates
+
+### profile_agent
+- Onboards new students (name, city, marks, field of interest)
+- Saves and retrieves student profile from memory
+- Updates marks when student provides new info
+
+### merit_agent
+- Takes student marks from profile
+- Calculates aggregate for each of the 5 universities
+- Uses formulas from data/formulas.py via tools/merit_tools.py
+
+### eligibility_agent
+- Answers "where can I get in?"
+- Compares student aggregate against last year's closing merits
+- Returns list of universities student is likely/unlikely to get into
+
+### deadline_agent
+- Returns application deadlines and entry test dates per university
+- Calculates days remaining until a deadline
+- Alerts student about upcoming deadlines for tracked unis
+
+### comparison_agent
+- Side-by-side comparison of two universities
+- Covers: fee structure, location, programs, merit, hostel info
+
+### search_agent
+- Uses Google Search tool for anything dynamic or time-sensitive
+- HEC policy changes, extended deadlines, new scholarships, news
+
+---
+
+## Persistent Memory
+- Student profile persists across sessions (name, marks, city, interest, tracked unis)
+- Memory is scoped per USER_ID — each student has isolated data
+- Do not store sensitive data in memory
+
+## Guardrails
+- Block queries unrelated to Pakistani university admissions
+- Do not answer medical, legal, or general knowledge questions
+- Politely redirect off-topic queries back to admission-related help
+
+---
+
+## Coding Conventions
+- Always use async/await correctly — no sync calls in async context
+- All tool functions must have clear docstrings (ADK uses them for tool selection)
+- Use type hints on all function signatures
+- No hardcoded strings inside logic — all uni names/data come from data/
+- Keep each file under 100 lines where possible
+- Comment the "why" not the "what"
