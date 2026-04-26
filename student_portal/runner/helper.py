@@ -1,23 +1,16 @@
 # helper.py — call_agent_async helper function
 from google.genai import types
-from runner.session import USER_ID, SESSION_ID, session_service
-from agents.coordinator import coordinator_agent
-from google.adk.runners import Runner
-
-runner = None
+import runner.session as session # Import the session module
 
 async def call_agent_async(query: str):
-    global runner
-    if runner is None:
-        runner = Runner(
-            agent=coordinator_agent,
-            app_name="student_portal",
-            session_service=session_service,
-        )
+    # Access the shared runner from the session module
+    if session.runner is None:
+        raise RuntimeError("Runner not initialized. Call create_session_and_runner() first.")
+        
     content = types.Content(role="user", parts=[types.Part(text=query)])
-    events = runner.run_async(
-        user_id=USER_ID,
-        session_id=SESSION_ID,
+    events = session.runner.run_async(
+        user_id=session.USER_ID,
+        session_id=session.SESSION_ID,
         new_message=content,
     )
     async for event in events:

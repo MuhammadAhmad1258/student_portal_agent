@@ -4,7 +4,7 @@ from tools.profile_tools import save_profile, get_profile, update_marks
 
 profile_agent = LlmAgent(
     name="profile_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     description="Saves and retrieves student profile and marks.",
     instruction="""
     Help the student set up or update their profile.
